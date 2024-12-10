@@ -1,23 +1,25 @@
 # fullstack-gpt-v2
 langchain v0.3.22 based gpt or agent service with python v3.10 + streamlit v1.40 + openai v1.57
 
+
 ## features
 
 ### challenge-01 (2024.12.09) : Welcome To Langchain
+### challenge-02 (2024.12.10) : Memory
 
 
 ## how to run
 
 ### setup
 
--   install python 3.10.12 and add system path on python & pip
+-   install python 3.10 ~ 3.12 LTS and add system path on python & pip
 
 ```
 $ python --version
-Python 3.10.12
+Python 3.10.11 (or 3.11.9 or 3.12.8)
 
 $ pip --version
-pip 22.0.2 from D:\setup\Python311\Lib\site-packages\pip (python 3.10)
+pip 22.0.2 from D:\setup\Python310\Lib\site-packages\pip (python 3.10)
 
 ```
 
@@ -40,7 +42,7 @@ OPENAI_API_KEY="..."
 
 ```
 from dotenv import dotenv_values
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 
 config = dotenv_values(".env")
 
@@ -54,11 +56,20 @@ llm = ChatOpenAI(
 
 -   run jupyter app in virtual environment
 
-```
-$ python -m venv ./env
+```bash
+$ python -m venv .venv
 $ source env/bin/activate
+$ pip install -r requirements.txt
 $ touch main.ipynb
-! select runtime kernel as venv - python 3.11.6
-! run code & debug for testing
 $ deactivate
+```
+
+-   run jupyter app in poertry environment
+
+```bash
+$ poetry init
+$ poetry shell
+$ poetry install
+$ touch main.ipynb
+$ exit
 ```

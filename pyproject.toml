@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "fullstack-gpt-v2"
+version = "0.1.0"
+description = "langchain based gpt or agent service "
+authors = ["toweringcloud <toweringcloud@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+black = "^24.8.0"
+langchain = "0.3.10" 
+langchain_community = "0.3.10" 
+langchain_openai = "0.2.11"
+openai = "1.57.0" 
+python-dotenv = "1.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
