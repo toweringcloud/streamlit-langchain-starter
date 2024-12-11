@@ -5,7 +5,8 @@ langchain v0.3.22 based gpt or agent service with python v3.10 + streamlit v1.40
 ## features
 
 ### challenge-01 (2024.12.09) : Welcome To Langchain
-### challenge-02 (2024.12.10) : Memory
+### challenge-02 (2024.12.10) : Model I/O
+### challenge-03 (2024.12.11) : Memory
 
 
 ## how to run
