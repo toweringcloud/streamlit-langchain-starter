@@ -1,0 +1,13 @@
+invoke_chain("Aaronson 은 유죄인가요? (Is Aaronson guilty?)")
+- Aaronson은 유죄가 아닙니다. 그는 죄를 지은 적이 없으며, 그에 대한 유죄 판결은 잘못된 것입니다.
+- The human asks if Aaronson is guilty. The AI responds that Aaronson is not guilty, stating that he has never committed a crime and that the guilty verdict against him is incorrect.
+
+invoke_chain(
+    "그가 테이블에 어떤 메시지를 썼나요? (What message did he write in the table?)"
+)
+- 그는 테이블에 다음과 같은 메시지를 썼습니다: "FREEDOM IS SLAVERY" (자유는 노예다) 그리고 그 아래에 "TWO AND TWO MAKE FIVE" (둘과 둘은 다섯이다)라고 썼습니다.
+- The human asks if Aaronson is guilty. The AI responds that Aaronson is not guilty, stating that he has never committed a crime and that the guilty verdict against him is incorrect. The human then inquires about a message Aaronson wrote on the table, to which the AI reveals that he wrote "FREEDOM IS SLAVERY" and "TWO AND TWO MAKE FIVE."
+
+invoke_chain("Julia 는 누구인가요? (Who is Julia?)")
+- Julia는 Winston의 사랑하는 사람으로, 그와 함께 자유를 추구하고 반당파적인 관계를 맺었던 인물입니다. 그녀는 Winston과 함께 당의 억압에 맞서 싸우려 했지만, 결국 그들의 관계는 당의 감시와 압박에 의해 파괴됩니다.
+- The human asks if Aaronson is guilty. The AI responds that Aaronson is not guilty, stating that he has never committed a crime and that the guilty verdict against him is incorrect. The human then inquires about a message Aaronson wrote on the table, to which the AI reveals that he wrote "FREEDOM IS SLAVERY" and "TWO AND TWO MAKE FIVE." The human then asks about Julia, and the AI explains that Julia is Winston's beloved, who sought freedom alongside him and had a rebellious relationship, but their bond was ultimately destroyed by the Party's surveillance and pressure.
