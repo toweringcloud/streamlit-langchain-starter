@@ -40,8 +40,8 @@ with st.sidebar:
 
     # Select Document File
     file = st.file_uploader(
-        "Upload a. txt .pdf or .docx file",
-        type=["pdf", "txt", "docx"],
+        "Upload a txt, pdf or docx file",
+        type=["docx", "pdf", "txt"],
     )
 
     # Link to Github Repo
