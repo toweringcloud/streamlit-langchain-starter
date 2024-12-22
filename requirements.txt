@@ -6,3 +6,4 @@ openai==1.57.0
 python-dotenv==1.0.1
 streamlit==1.41.1
 unstructured==0.16.11
+wikipedia==1.4.0

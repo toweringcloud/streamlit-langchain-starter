@@ -11,6 +11,7 @@ from langchain_openai import ChatOpenAI
 from langchain_openai import OpenAIEmbeddings
 from pathlib import Path
 
+
 st.set_page_config(
     page_title="::: Document GPT :::",
     page_icon="📜",
@@ -38,7 +39,7 @@ with st.sidebar:
         ("gpt-3.5-turbo", "gpt-4o-mini"),
     )
 
-    # Select Document File
+    # Upload Document File
     file = st.file_uploader(
         "Upload a txt, pdf or docx file",
         type=["docx", "pdf", "txt"],
