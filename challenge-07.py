@@ -23,7 +23,7 @@ st.markdown(
     """
         Welcome to Site GPT!
 
-        Ask questions about the content of a website. 
+        Ask questions about the content of a website.\n
         Start by writing the URL of the website on the sidebar.
     """
 )
@@ -140,7 +140,7 @@ def load_website(url):
             parsing_function=parse_page,
             continue_on_failure=True,
         )
-        if "Cloudflare" in sitemap_url
+        if "cloudflare" in sitemap_url
         else SitemapLoader(url, parsing_function=parse_page, continue_on_failure=True)
     )
     loader.requests_per_second = 2
