@@ -12,7 +12,8 @@ langchain v0.3.10 based gpt or agent service with python v3.10 + streamlit v1.41
 -   [demo] https://toweringcloud-document-gpt.streamlit.app
 ### challenge-06 (2024.12.22) : QuizGPT Turbo
 -   [demo] https://toweringcloud-quiz-gpt.streamlit.app
-
+### challenge-07 (2024.12.24) : SiteGPT
+-   [demo] https://toweringcloud-site-gpt.streamlit.app
 
 ## how to run
 
