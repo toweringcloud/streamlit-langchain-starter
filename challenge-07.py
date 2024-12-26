@@ -21,10 +21,12 @@ st.title("Site GPT")
 
 st.markdown(
     """
-        Welcome to Site GPT!
+        Use this chatbot to ask questions about the content of a website.
 
-        Ask questions about the content of a website.\n
-        Start by writing the URL of the website on the sidebar.
+        1. Input your OpenAI API Key on the sidebar.
+        2. Choose an AI model (gpt-4o-mini, ...).
+        3. Choose a SiteMap (Cloudflare, ...).
+        4. Ask questions related to the selected website.
     """
 )
 
@@ -164,7 +166,7 @@ with st.sidebar:
     # Input LLM API Key
     openai_api_key = st.text_input("Input your OpenAI API Key", type="password")
 
-    # Select LLM Model
+    # Select AI Model
     selected_model = st.selectbox(
         "Choose your AI Model",
         ("gpt-4o-mini", "gpt-3.5-turbo"),

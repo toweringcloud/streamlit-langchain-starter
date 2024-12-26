@@ -1,5 +1,6 @@
 import json
 import streamlit as st
+import streamlit.components.v1 as components
 from langchain.callbacks import StreamingStdOutCallbackHandler
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import CharacterTextSplitter
@@ -18,10 +19,15 @@ st.title("Quiz GPT")
 
 st.markdown(
     """
-        Welcome to Quiz GPT!
+        Use this chatbot to test your knowledge with quiz challenge.
 
-        I will make a quiz from Wikipedia or your own file to test your knowledge.
-        Get started by uploading a file or searching on Wikipedia in the sidebar.
+        1. Input your OpenAI API Key on the sidebar.
+        2. Choose an AI model (gpt-4o-mini, ...).
+        3. Choose a challenge level (Easy | Medium | Hard).
+        4. Choose a favorite language (Korean, ...).
+        5. Choose a knowledge source (wiki or file).
+        6. Input search keyword or Upload your file.
+        7. Challenge the quiz created by an AI tutor.
     """
 )
 
@@ -83,7 +89,14 @@ prompt = PromptTemplate.from_template(
 )
 
 
-@st.cache_data(show_spinner="Loading your file...")
+@st.cache_resource(show_spinner="Making Wikipedia...")
+def wiki_search(term):
+    retriever = WikipediaRetriever(top_k_results=5, lang="ko")
+    docs = retriever.invoke(term)
+    return docs
+
+
+@st.cache_resource(show_spinner="Loading your file...")
 def split_file(file):
     file_content = file.read()
     file_path = f"./.files/{file.name}"
@@ -102,7 +115,7 @@ def split_file(file):
     return docs
 
 
-@st.cache_data(show_spinner="Making Quiz...")
+@st.cache_resource(show_spinner="Making Quiz...")
 def run_quiz_chain(_docs, _level, _language):
     chain = prompt | llm
     return chain.invoke(
@@ -114,17 +127,31 @@ def run_quiz_chain(_docs, _level, _language):
     )
 
 
-@st.cache_data(show_spinner="Making Wikipedia...")
-def wiki_search(term):
-    retriever = WikipediaRetriever(top_k_results=5, lang="ko")
-    docs = retriever.invoke(term)
-    return docs
-
-
-# Define Reset
+# Define Reset Actions
 def reset_all():
-    for key in st.session_state.keys():
-        del st.session_state[key]
+    # for key in st.session_state.keys():
+    #     del st.session_state[key]
+    # wiki_search.clear()
+    # split_file.clear()
+    # run_quiz_chain.clear()
+    # st.experimental_rerun()
+    # st.experimental_set_query_params(refresh="true")
+    st.markdown(
+        """
+            <script>
+                location.reload();
+            </script>
+        """,
+        unsafe_allow_html=True,
+    )
+    components.html(
+        """
+            <script>
+                window.location.reload();
+            </script>
+        """,
+        height=0,
+    )
 
 
 with st.sidebar:
@@ -135,25 +162,22 @@ with st.sidebar:
     # Input LLM API Key
     openai_api_key = st.text_input("Input your OpenAI API Key", type="password")
 
-    # Select LLM Model
+    # Select AI Model
     selected_model = st.selectbox(
         "Choose your AI Model",
         ("gpt-4o-mini", "gpt-3.5-turbo"),
-        key="select_model",
     )
 
     # Select Challenge Level
     challenge_level = st.selectbox(
-        "Choose your challenge Level",
+        "Choose your challenge level",
         ("Easy", "Medium", "Hard"),
-        key="select_level",
     )
 
     # Select Favorite Language
     language = st.selectbox(
-        "Choose your favorite Language",
+        "Choose your favorite language",
         ("Korean", "English", "Spanish"),
-        key="select_language",
     )
 
     # Select Quiz Target (Wiki or Custom File)
@@ -163,11 +187,10 @@ with st.sidebar:
             "Wikipedia Article",
             "Your Custom Document",
         ),
-        key="select_target",
     )
 
     # Upload Document File on Your Custom Document
-    if quiz_target == "Your Custom Document":
+    if quiz_target == "Your Document File":
         file = st.file_uploader(
             "Upload a txt, pdf or docx file",
             type=["docx", "pdf", "txt"],
@@ -182,8 +205,11 @@ with st.sidebar:
             docs = wiki_search(topic)
 
     # Reset all settings
-    # if st.button("Reset"):
-    #     reset_all()
+    if st.button("Reset"):
+        reset_all()
+        placeholder = st.empty()
+        with placeholder.container():
+            st.info("Content has been reset.")
 
     # Link to Github Repo
     st.markdown("---")
@@ -196,10 +222,10 @@ with st.sidebar:
 
 if not openai_api_key:
     st.error("Please input your OpenAI API Key on the sidebar")
-elif quiz_target == "Your Custom Document" and not docs:
-    st.error("Please upload your Document File!")
+elif quiz_target == "Your Document File" and not docs:
+    st.error("Please upload your document file!")
 elif quiz_target == "Wikipedia Article" and not docs:
-    st.error("Please input your Keyword to search on Wikipedia!")
+    st.error("Please input your keyword to search on Wikipedia!")
 else:
     llm = ChatOpenAI(
         openai_api_key=openai_api_key,
@@ -244,4 +270,3 @@ else:
             st.balloons()
 
         button = st.form_submit_button("Submit")
-        # reset = st.form_submit_button("Reset", on_click=reset_all)

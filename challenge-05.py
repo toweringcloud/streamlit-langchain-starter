@@ -20,11 +20,12 @@ st.title("Document GPT")
 
 st.markdown(
     """         
-        Use this chatbot to ask questions to an AI about your files.
+        Use this chatbot to ask questions about your document.
 
-        1. Input your OpenAI API Key on the sidebar
-        2. Upload your file on the sidebar.
-        3. Ask questions related to the document.
+        1. Input your OpenAI API Key on the sidebar.
+        2. Choose an AI model (gpt-4o-mini, ...).
+        3. Upload a document file (txt | doc | pdf).
+        4. Ask questions related to the document.
     """
 )
 st.divider()
@@ -33,7 +34,7 @@ with st.sidebar:
     # Input LLM API Key
     openai_api_key = st.text_input("Input your OpenAI API Key", type="password")
 
-    # Select LLM Model
+    # Select AI Model
     selected_model = st.selectbox(
         "Choose your AI Model",
         ("gpt-3.5-turbo", "gpt-4o-mini"),
