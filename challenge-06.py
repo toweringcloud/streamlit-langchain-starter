@@ -81,7 +81,7 @@ prompt = PromptTemplate.from_template(
         You are a helpful assistant that is playing a role of a famous teacher that absolutely loves quiz.
         Based ONLY on the following context, make 5 questions to test the user's knowledge about the text.
         Each question should have 4 answers, three of them must be incorrect and one should be correct.
-        Be sure that all the questions & answers should be written in {language} Language.
+        Be sure that all the questions & answers should be written in {language} language.
         The difficulty level of the problem is '{level}'.
 
         Context: {context}
