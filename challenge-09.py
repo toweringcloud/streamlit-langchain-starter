@@ -18,9 +18,9 @@ st.markdown(
     """
         Use this chatbot to research something you're curious about.
 
-        1. Input your OpenAI API Key on the sidebar.
+        1. Choose a favorite language (Korean, ...).
         2. Choose an AI model (gpt-4o-mini, ...).
-        3. Choose a favorite language (Korean, ...).
+        3. Input your OpenAI API Key on the sidebar.
         4. Ask questions to research something you wonder.
     """
 )
@@ -28,12 +28,6 @@ st.divider()
 
 
 with st.sidebar:
-    # Input LLM API Key
-    openai_api_key = st.text_input(
-        "Input your OpenAI API Key",
-        type="password",
-    )
-
     # Select Favorite Language
     language = st.selectbox(
         "Choose your favorite language",
@@ -47,6 +41,12 @@ with st.sidebar:
             "gpt-4o-mini",
             "gpt-3.5-turbo",
         ),
+    )
+
+    # Input LLM API Key
+    openai_api_key = st.text_input(
+        "Input your OpenAI API Key",
+        type="password",
     )
 
     # Link to Github Repo
