@@ -1,5 +1,5 @@
 # fullstack-gpt-v2
-langchain v0.3.10 based gpt or agent service with python v3.10 + streamlit v1.41 + openai v1.57
+langchain v0.3.10 based gpt service with python v3.10 + streamlit v1.41 + openai v1.57
 
 
 ## features
@@ -14,6 +14,9 @@ langchain v0.3.10 based gpt or agent service with python v3.10 + streamlit v1.41
 -   [demo] https://toweringcloud-quiz-gpt.streamlit.app
 ### challenge-07 (2024.12.24) : SiteGPT
 -   [demo] https://toweringcloud-site-gpt.streamlit.app
+### challenge-08 (2024.12.26) : Agents
+### challenge-09 (2024.12.28) : OpenAI Assistants
+-   [demo] https://toweringcloud-research-gpt.streamlit.app
 
 ## how to run
 
