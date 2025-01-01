@@ -1,5 +1,5 @@
 # fullstack-gpt-v2
-langchain v0.3.10 based gpt service with python v3.10 + streamlit v1.41 + openai v1.57
+langchain v0.3.10 based gpt service with python v3.12 + streamlit v1.41 + openai v1.57
 
 
 ## features
@@ -10,13 +10,16 @@ langchain v0.3.10 based gpt service with python v3.10 + streamlit v1.41 + openai
 ### challenge-04 (2024.12.15) : RAG
 ### challenge-05 (2024.12.17) : Streamlit is 🔥
 -   [demo] https://toweringcloud-document-gpt.streamlit.app
-### challenge-06 (2024.12.22) : QuizGPT Turbo
+### challenge-06 (2024.12.22) : Quiz GPT Turbo
 -   [demo] https://toweringcloud-quiz-gpt.streamlit.app
-### challenge-07 (2024.12.24) : SiteGPT
+### challenge-07 (2024.12.24) : Site GPT
 -   [demo] https://toweringcloud-site-gpt.streamlit.app
 ### challenge-08 (2024.12.26) : Agents
-### challenge-09 (2024.12.28) : OpenAI Assistants
+### challenge-09 (2024.12.28) : Research Assistant
 -   [demo] https://toweringcloud-research-gpt.streamlit.app
+### challenge-10 (2024.12.31) : Meeting GPT
+-   [demo] https://toweringcloud-meeting-gpt.streamlit.app
+
 
 ## how to run
 
@@ -26,10 +29,10 @@ langchain v0.3.10 based gpt service with python v3.10 + streamlit v1.41 + openai
 
 ```sh
 $ python --version
-Python 3.10.11 (or 3.11.9 or 3.12.8)
+Python 3.12.7 (or 3.10.11 or 3.11.9 or 3.12.8)
 
 $ pip --version
-pip 22.0.2 from /usr/lib/python3/dist-packages/pip (python 3.10)
+pip 24.2 from /usr/lib/python3/dist-packages/pip (python 3.12)
 ```
 
 ### config
