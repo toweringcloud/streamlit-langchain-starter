@@ -3,6 +3,7 @@ import imageio_ffmpeg
 import io
 import math
 import os
+import platform
 import requests
 import streamlit as st
 import subprocess
@@ -18,6 +19,7 @@ from langchain_openai import OpenAIEmbeddings
 from openai import OpenAI
 from pathlib import Path
 from pydub import AudioSegment
+from pydub.utils import which
 from pytubefix import YouTube
 
 
@@ -53,7 +55,7 @@ def check_website_availale(url):
 def check_ffmpeg_installed():
     try:
         result = subprocess.run(
-            ["ffmpeg", "-version"],
+            [ffmpeg_path, "-version"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -69,10 +71,55 @@ def check_ffmpeg_installed():
         return False, "ffmpeg not found"
 
 
-def install_ffmpeg_with_imageio():
+def install_ffmpeg_on_platform():
+    """
+    Detects the operating system and installs FFmpeg accordingly.
+    """
+    os_type = platform.system()
+
+    try:
+        if os_type == "Windows":
+            url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+            zip_path = "ffmpeg.zip"
+            print(f"Downloading FFmpeg from {url}...")
+            subprocess.run(["curl", "-L", "-o", zip_path, url], check=True)
+
+            print("Extracting FFmpeg...")
+            subprocess.run(["tar", "-xf", zip_path, "-C", "C:\\"], check=True)
+            print("FFmpeg installed successfully on Windows.")
+
+        elif os_type == "Linux":
+            print("Installing FFmpeg using apt...")
+            subprocess.run(["sudo", "apt", "update"], check=True)
+            subprocess.run(["sudo", "apt", "install", "-y", "ffmpeg"], check=True)
+            print("FFmpeg installed successfully on Linux.")
+
+        elif os_type == "Darwin":
+            print("Installing FFmpeg using Homebrew...")
+            subprocess.run(["brew", "install", "ffmpeg"], check=True)
+            print("FFmpeg installed successfully on macOS.")
+
+        else:
+            print(f"Unsupported OS: {os_type}")
+
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while installing FFmpeg: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+def install_ffmpeg():
     try:
         imageio_ffmpeg.get_ffmpeg_exe()
-        return True, "FFmpeg is installed."
+        is_installed, message = check_ffmpeg_installed()
+
+        if is_installed:
+            return True, "FFmpeg is installed."
+        else:
+            print(message)
+            install_ffmpeg_on_platform()
+            return check_ffmpeg_installed()
+
     except Exception as e:
         return False, str(e)
 
@@ -88,6 +135,9 @@ def has_transcript():
 def extract_audio_from_video(video_path, audio_path):
     if has_transcript():
         return
+    if os.path.exists(audio_path):
+        print(f"audio({audio_path}) already exists!")
+        return
     if not os.path.exists(video_path):
         print(f"video({video_path}) not available!")
         return
@@ -95,44 +145,19 @@ def extract_audio_from_video(video_path, audio_path):
     # check ffmpeg utility installed
     is_installed, message = check_ffmpeg_installed()
     if is_installed:
+        # FFmpeg is already installed: ffmpeg version 7.1-essentials_build-www.gyan.dev Copyright (c) 2000-2024 the FFmpeg developers
         st.success(f"FFmpeg is already installed: {message}")
-
-        # use ffmpeg to extract audio
-        command = [
-            "ffmpeg",
-            "-y",
-            "-i",
-            video_path,
-            "-vn",
-            audio_path,
-        ]
+        command = [ffmpeg_path, "-y", "-i", video_path, "-vn", audio_path]
         subprocess.run(command)
     else:
-        if st.button("FFmpeg Inatallation"):
-            with st.spinner("Installing FFmpeg..."):
-                success, message1 = install_ffmpeg_with_imageio()
-                is_installed, message2 = check_ffmpeg_installed()
-                if success and is_installed:
-                    st.success(message1)
-                else:
-                    message3 = "install FFmpeg manually before next step!"
-                    st.error(f"Failed to install FFmpeg: {message2}, {message3}")
-
-    # recheck ffmpeg utility installed
-    is_installed, message = check_ffmpeg_installed()
-    if is_installed:
-        st.success(f"FFmpeg has just installed: {message}")
-
-        # use ffmpeg to extract audio
-        command = [
-            "ffmpeg",
-            "-y",
-            "-i",
-            video_path,
-            "-vn",
-            audio_path,
-        ]
-        subprocess.run(command)
+        with st.spinner("Installing FFmpeg..."):
+            success, message = install_ffmpeg()
+            if success:
+                st.success(message)
+                command = [ffmpeg_path, "-y", "-i", video_path, "-vn", audio_path]
+                subprocess.run(command)
+            else:
+                st.error(f"Failed to install FFmpeg. Retry to install manually!")
 
 
 @st.cache_data()
@@ -143,7 +168,11 @@ def cut_audio_in_chunks(audio_path, chunk_size, chunks_dir):
         print(f"audio({audio_path}) not available!")
         return
 
-    track = AudioSegment.from_mp3(audio_path)
+    AudioSegment.converter = which(ffmpeg_path)
+    absolute_audio_path = os.path.abspath(audio_path)
+    print(f"{absolute_audio_path} | {os.path.exists(absolute_audio_path)}")
+    track = AudioSegment.from_mp3(absolute_audio_path)
+
     chunk_len = chunk_size * 60 * 1000
     chunks = math.ceil(len(track) / chunk_len)
     for i in range(chunks):
@@ -206,10 +235,17 @@ with st.sidebar:
     video_dir = None
     video_source = None
 
+    os_type = platform.system()
+    ffmpeg_path = (
+        "C:/ffmpeg-7.1-essentials_build/bin/ffmpeg.exe"
+        if os_type == "Windows"
+        else "ffmpeg"
+    )
+
     # Select Favorite Language
     language = st.selectbox(
         "Choose your favorite language",
-        ("Korean", "English", "Spanish", "Chinese", "Japanese"),
+        ("Korean", "English"),
     )
 
     # Select AI Model
@@ -296,8 +332,6 @@ else:
     video_path = f"{video_dir}/{video_name}"
     audio_path = f"{video_path}".replace(video_extension, ".mp3")
     transcript_path = f"{video_path}".replace(video_extension, ".txt")
-    chunks_dir = f"{video_dir}/chunks"
-    Path(chunks_dir).mkdir(parents=True, exist_ok=True)
 
     splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=800,
@@ -317,6 +351,8 @@ else:
         else:
             status.update(label="Cutting audio segments...")
             chunk_minutes = 3
+            chunks_dir = f"{video_dir}/chunks"
+            Path(chunks_dir).mkdir(parents=True, exist_ok=True)
             cut_audio_in_chunks(audio_path, chunk_minutes, chunks_dir)
 
             status.update(label="Transcribing audio...")

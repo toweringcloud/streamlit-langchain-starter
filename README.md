@@ -14,7 +14,7 @@ langchain v0.3.10 based gpt service with python v3.12 + streamlit v1.41 + openai
 -   [demo] https://toweringcloud-quiz-gpt.streamlit.app
 ### challenge-07 (2024.12.24) : Site GPT
 -   [demo] https://toweringcloud-site-gpt.streamlit.app
-### challenge-08 (2024.12.26) : Agents
+### challenge-08 (2024.12.26) : ChatBot Agent
 ### challenge-09 (2024.12.28) : Research Assistant
 -   [demo] https://toweringcloud-research-gpt.streamlit.app
 ### challenge-10 (2024.12.31) : Meeting GPT
