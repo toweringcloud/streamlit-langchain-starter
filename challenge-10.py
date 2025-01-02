@@ -208,8 +208,7 @@ def transcribe_chunks(chunks_dir, destination):
                 file=audio_file,
                 response_format="text",
             )
-            print(transcription.text)
-            text_file.write(transcription["text"])
+            text_file.write(transcription)
     print(f"transcribe_chunks.o: {Path(destination).stat().st_size} bytes")
 
 
