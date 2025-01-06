@@ -21,6 +21,7 @@ from pathlib import Path
 from pydub import AudioSegment
 from pydub.utils import which
 from pytubefix import YouTube
+from pytubefix.exceptions import LiveStreamError
 
 
 st.set_page_config(
@@ -263,16 +264,18 @@ with st.sidebar:
     )
 
     # Select Knowledge Target (File or Youtube)
-    knowledge_target = st.selectbox(
-        "Choose what you want to use",
-        (
-            "Your Video File",
-            "Youtube Channel",
-        ),
-    )
+    knowledge_target = None
+    if os_type != "Linux":
+        knowledge_target = st.selectbox(
+            "Choose what you want to use",
+            (
+                "Your Video File",
+                "Youtube Channel",
+            ),
+        )
 
     # Upload Video File or Input Youtube Channel
-    if knowledge_target == "Your Video File":
+    if os_type == "Linux" or knowledge_target == "Your Video File":
         video_source = st.file_uploader(
             "Upload your Video file",
             type=["mp4", "avi", "mkv", "mov"],
@@ -292,15 +295,21 @@ with st.sidebar:
 
             video_url = "https://youtube.com/watch?v={}".format(video_channel)
             if check_website_availale(video_url) == 200:
-                yt = YouTube(video_url)
-                stream = yt.streams.get_highest_resolution()
-                stream.download(output_path=video_dir, filename=video_file)
+                try:
+                    yt = YouTube(video_url)
+                    stream = yt.streams.get_highest_resolution()
+                    stream.download(output_path=video_dir, filename=video_file)
 
-                with open(f"{video_dir}/{video_file}", "rb") as file:
-                    video_source = io.BytesIO(file.read())
-                    video_source.name = video_file
-                    video_source.type = "video/mpeg"
-                    video_source.seek(0)
+                    with open(f"{video_dir}/{video_file}", "rb") as file:
+                        video_source = io.BytesIO(file.read())
+                        video_source.name = video_file
+                        video_source.type = "video/mpeg"
+                        video_source.seek(0)
+
+                except LiveStreamError as lse:
+                    print("Unsupported on Live Streaming!")
+                except Exception as e:
+                    print(e)
             else:
                 st.write(f"{video_url} not available!")
 
