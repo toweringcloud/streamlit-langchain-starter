@@ -37,9 +37,8 @@ st.markdown(
         1. Choose a favorite language (Korean, ...).
         2. Choose an AI model (gpt-4o-mini, ...).
         3. Input your OpenAI API Key on the sidebar.
-        4. Choose a video source (file or youtube).
-        5. Upload your file or input video channel.
-        6. Ask questions to research something you wonder.
+        4. Upload your video file for transcribing.
+        5. Ask questions to research something you wonder.
     """
 )
 
@@ -80,6 +79,9 @@ def install_ffmpeg_on_platform():
 
     try:
         if os_type == "Windows":
+            # print("Installing FFmpeg using choco...")
+            # subprocess.run(["choco", "install", "ffmpeg"], check=True)
+
             url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
             zip_path = "ffmpeg.zip"
             print(f"Downloading FFmpeg from {url}...")
@@ -169,21 +171,26 @@ def cut_audio_in_chunks(audio_path, chunk_size, chunks_dir):
         print(f"audio({audio_path}) not available!")
         return
 
-    AudioSegment.converter = which(ffmpeg_path)
-    absolute_audio_path = os.path.abspath(audio_path)
-    print(f"{absolute_audio_path} | {os.path.exists(absolute_audio_path)}")
-    track = AudioSegment.from_mp3(absolute_audio_path)
+    try:
+        ffmpeg_path_installed = which("ffmpeg")
+        AudioSegment.converter = ffmpeg_path_installed
+        AudioSegment.ffmpeg = ffmpeg_path_installed
+        absolute_audio_path = os.path.abspath(audio_path)
+        track = AudioSegment.from_mp3(absolute_audio_path)
 
-    chunk_len = chunk_size * 60 * 1000
-    chunks = math.ceil(len(track) / chunk_len)
-    for i in range(chunks):
-        start_time = i * chunk_len
-        end_time = (i + 1) * chunk_len
-        chunk = track[start_time:end_time]
-        chunk.export(
-            f"{chunks_dir}/chunk_{i}.mp3",
-            format="mp3",
-        )
+        chunk_len = chunk_size * 60 * 1000
+        chunks = math.ceil(len(track) / chunk_len)
+        for i in range(chunks):
+            start_time = i * chunk_len
+            end_time = (i + 1) * chunk_len
+            chunk = track[start_time:end_time]
+            chunk.export(
+                f"{chunks_dir}/chunk_{i}.mp3",
+                format="mp3",
+            )
+
+    except Exception:
+        st.error("ffmpeg not found, check it properly installed!")
 
 
 @st.cache_resource(show_spinner="Transcribing audio...")
@@ -202,7 +209,9 @@ def transcribe_chunks(chunks_dir, destination):
     client = OpenAI(api_key=openai_api_key)
 
     for file in files:
-        with open(file, "rb") as audio_file, open(destination, "a") as text_file:
+        with open(file, "rb") as audio_file, open(
+            destination, "a", encoding="utf-8"
+        ) as text_file:
             # https://platform.openai.com/docs/guides/speech-to-text
             transcription = client.audio.transcriptions.create(
                 model="whisper-1",
@@ -215,10 +224,10 @@ def transcribe_chunks(chunks_dir, destination):
 
 @st.cache_resource(show_spinner="Embedding file...")
 def embed_file(file_path):
-    embedding_dir = f"{video_path}/embeddings"
+    embedding_dir = f"{video_dir}/embeddings"
     Path(embedding_dir).mkdir(parents=True, exist_ok=True)
     embedding_cache_dir = LocalFileStore(embedding_dir)
-    loader = TextLoader(file_path)
+    loader = TextLoader(file_path, encoding="utf-8")
     docs = loader.load_and_split(text_splitter=splitter)
     embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
     cached_embeddings = CacheBackedEmbeddings.from_bytes_store(
@@ -230,12 +239,12 @@ def embed_file(file_path):
 
 
 with st.sidebar:
+    os_type = platform.system()
     cache_dir = "./.cache"
     work_dir = f"{cache_dir}/challenge-10"
     video_dir = None
     video_source = None
 
-    os_type = platform.system()
     ffmpeg_path = (
         "C:/ffmpeg-7.1-essentials_build/bin/ffmpeg.exe"
         if os_type == "Windows"
@@ -307,9 +316,13 @@ with st.sidebar:
                         video_source.seek(0)
 
                 except LiveStreamError as lse:
-                    print("Unsupported on Live Streaming!")
+                    st.error("No support on live streaming!")
+                    print(lse)
+
                 except Exception as e:
+                    st.error("Failed to download video stream!")
                     print(e)
+
             else:
                 st.write(f"{video_url} not available!")
 
@@ -342,8 +355,8 @@ else:
     transcript_path = f"{video_path}".replace(video_extension, ".txt")
 
     splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-        chunk_size=800,
-        chunk_overlap=100,
+        chunk_size=1000,
+        chunk_overlap=200,
     )
 
     with st.status("Loading video...") as status:
@@ -363,8 +376,12 @@ else:
             Path(chunks_dir).mkdir(parents=True, exist_ok=True)
             cut_audio_in_chunks(audio_path, chunk_minutes, chunks_dir)
 
-            status.update(label="Transcribing audio...")
-            transcribe_chunks(chunks_dir, transcript_path)
+            if not os.path.exists(f"{chunks_dir}/chunk_0.mp3"):
+                st.error("audio chunks not available!")
+                print("audio chunks not available!")
+            else:
+                status.update(label="Transcribing audio...")
+                transcribe_chunks(chunks_dir, transcript_path)
 
     transcript_tab, summary_tab, qa_tab = st.tabs(
         [
@@ -378,55 +395,60 @@ else:
         if not os.path.exists(audio_path):
             print(f"audio({audio_path}) not available!")
         else:
-            with open(transcript_path, "r") as file:
+            with open(transcript_path, "r", encoding="utf-8") as file:
                 st.write(file.read())
 
     with summary_tab:
         start = st.button("Generate summary")
         if start:
             if has_transcript():
-                loader = TextLoader(transcript_path)
+                loader = TextLoader(transcript_path, encoding="utf-8")
                 docs = loader.load_and_split(text_splitter=splitter)
 
                 first_summary_prompt = ChatPromptTemplate.from_template(
                     """
-                    Write a concise summary of the following:
-                    "{text}"
-                    CONCISE SUMMARY:
-                """
+                        Write a concise summary of the following as {language}:
+                        "{text}"
+                        CONCISE SUMMARY:
+                    """
                 )
 
                 first_summary_chain = first_summary_prompt | llm | StrOutputParser()
                 summary = first_summary_chain.invoke(
-                    {"text": docs[0].page_content},
+                    {"text": docs[0].page_content, "language": language},
                 )
                 st.write(summary)
 
-                refine_prompt = ChatPromptTemplate.from_template(
-                    """
-                    Your job is to produce a final summary.
-                    We have provided an existing summary up to a certain point: {existing_summary}
-                    We have the opportunity to refine the existing summary (only if needed) with some more context below.
-                    ------------
-                    {context}
-                    ------------
-                    Given the new context, refine the original summary.
-                    If the context isn't useful, RETURN the original summary.
-                """
-                )
+                refine_summary = False
+                if refine_summary:
+                    refine_prompt = ChatPromptTemplate.from_template(
+                        """
+                            Your job is to produce a final summary as {language}.
+                            We have provided an existing summary up to a certain point: {existing_summary}
+                            We have the opportunity to refine the existing summary (only if needed) with some more context below.
+                            ------------
+                            {context}
+                            ------------
+                            Given the new context, refine the original summary.
+                            If the context isn't useful, RETURN the original summary.
+                        """
+                    )
 
-                refine_chain = refine_prompt | llm | StrOutputParser()
+                    refine_chain = refine_prompt | llm | StrOutputParser()
 
-                with st.status("Summarizing...") as status:
-                    for i, doc in enumerate(docs[1:]):
-                        status.update(label=f"Processing document {i+1}/{len(docs)-1} ")
-                        summary = refine_chain.invoke(
-                            {
-                                "existing_summary": summary,
-                                "context": doc.page_content,
-                            }
-                        )
-                        st.write(summary)
+                    with st.status("Summarizing...") as status:
+                        for i, doc in enumerate(docs[1:]):
+                            status.update(
+                                label=f"Processing document {i+1}/{len(docs)-1} "
+                            )
+                            summary = refine_chain.invoke(
+                                {
+                                    "existing_summary": summary,
+                                    "context": doc.page_content,
+                                    "language": language,
+                                }
+                            )
+                            st.write(summary)
 
             else:
                 print(f"{transcript_path} not available!")
